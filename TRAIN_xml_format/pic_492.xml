@@ -1,0 +1,26 @@
+<annotation>
+	<folder>drone _ Google_da Ara</folder>
+	<filename>pic_492.jpg</filename>
+	<path>C:\Users\mehdi\Downloads\ss\drone _ Google_da Ara\pic_492.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>528</width>
+		<height>396</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>drone</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>152</xmin>
+			<ymin>53</ymin>
+			<xmax>512</xmax>
+			<ymax>379</ymax>
+		</bndbox>
+	</object>
+</annotation>
