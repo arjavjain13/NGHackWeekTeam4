@@ -2,3 +2,4 @@ numpy
 matplotlib
 tensorflow
 opencv-python
+lxml
