@@ -1,0 +1,26 @@
+<annotation>
+	<folder>video.cikti.2</folder>
+	<filename>moto01915.png</filename>
+	<path>C:\Users\John Doe.DESKTOP-QVG68SG\Desktop\video.cikti.2\moto01915.png</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1280</width>
+		<height>720</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>drone</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>476</xmin>
+			<ymin>69</ymin>
+			<xmax>1050</xmax>
+			<ymax>613</ymax>
+		</bndbox>
+	</object>
+</annotation>
