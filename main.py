@@ -1,3 +1,4 @@
+
 import os
 import cv2 as cv
 import numpy as np 
@@ -73,3 +74,6 @@ model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=
 
 # Train model; validation_ data are the test data we need ask to get from mentor. 
 model.fit(images, labels, epochs=10, validation_data = (test_image,test_label))
+
+
+
