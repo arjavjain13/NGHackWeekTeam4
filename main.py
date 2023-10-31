@@ -20,15 +20,32 @@ def load_image(image_path):
     image = image / 255.0  # Normalize to [0, 1]
     return image
 
-# Parse an XML file to get the class label
 def parse_xml(xml_path):
     tree = ET.parse(xml_path)
     root = tree.getroot()
+    labels = []
     for object_tag in root.findall('object'):
         label = object_tag.find('name').text
-        return label
-    return None
+        xmin = float(object_tag.find('bndbox/xmin').text)
+        ymin = float(object_tag.find('bndbox/ymin').text)
+        xmax = float(object_tag.find('bndbox/xmax').text)
+        ymax = float(object_tag.find('bndbox/ymax').text)
+        depth = float(object_tag.find('size/depth').text)
+        height = float(object_tag.find('size/height').text)
+        width = float(object_tag.find('size/width').text)
 
+        # You can preprocess and format these values as needed
+        # For example, normalize the bounding box coordinates and scale the depth, height, and width
+
+        labels.append({
+            "label": label,
+            "bbox": (xmin, ymin, xmax, ymax),
+            "depth": depth,
+            "height": height,
+            "width": width
+        })
+
+    return labels
 
 # Load dataset
 images = []
@@ -72,8 +89,13 @@ model.add(layers.Dense(10, activation = 'softmax'))
 
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
+# split into training and validation data into 80 20
+X_train, X_val, y_train, y_val = train_test_split(images, labels, test_size=0.2, random_state=42)
+
+# Train model
+model.fit(X_train, y_train, epochs=10, validation_data=(X_val, y_val))
 # Train model; validation_ data are the test data we need ask to get from mentor. 
-model.fit(images, labels, epochs=10, validation_data = (test_image,test_label))
+#model.fit(images, labels, epochs=10, validation_data = (test_image,test_label))
 
 
 
