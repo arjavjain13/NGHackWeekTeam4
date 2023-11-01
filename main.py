@@ -1,79 +1,107 @@
-
 import os
 import cv2 as cv
 import numpy as np 
-import matplotlib.pyplot as plt 
-from xml.etree import ElementTree as ET
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras import layers, models  
+from tensorflow.keras import layers, models, applications
 
+data_dir = "/Users/zhenzhang/Desktop/CS courses /NGHackWeekTeam4/TRAIN_txt"
 
-# Directory containing images and XML files
-data_dir = "."
-
-# Load and preprocess an image
-def load_image(image_path):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.resize(image, (224, 224))
-    image = image / 255.0  # Normalize to [0, 1]
+####  we are using the VGG16 model from the tensorflow.keras.applications
+def load_image(image_path, convert):
+    image = cv.imread(image_path)
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    image = cv.resize(image, (224, 224))
+    if convert:
+        image = np.expand_dims(image, axis=0)
+    image = image / 255.0
     return image
 
-# Parse an XML file to get the class label
-def parse_xml(xml_path):
-    tree = ET.parse(xml_path)
-    root = tree.getroot()
-    for object_tag in root.findall('object'):
-        label = object_tag.find('name').text
-        return label
-    return None
+def parse_txt(txt_path):
+    # Check if txt file exists
+    if not os.path.exists(txt_path):
+        return [1], [[0, 0, 0, 0]]  # Return 1 label stand for no drone and dummy coordinates
 
+    with open(txt_path, 'r') as file:
+        lines = file.readlines()
+        
+        first_line = lines[0].strip().split()
+        
+        label = int(first_line[0])
+        box = [float(coord) for coord in first_line[1:]]
+        
+        return [label], [box]
 
-# Load dataset
 images = []
-labels = []
-label_to_index = {}  # Dictionary to convert labels to integer indices
-index = 0
+all_labels = []
+all_boxes = []
 
-# extract the images and label from the folder and them put them in array 
+label_to_index = {0: "drone", 1: "no drone"}  # Define mapping for labels
+index_to_label = {"drone": 0, "no drone": 1} # useful when we test our model on new images
+
+total = 0 
 for filename in os.listdir(data_dir):
-    if filename.endswith(".png"):
+    if filename.endswith(".png") or filename.endswith(".jpg"):
         base_name = os.path.splitext(filename)[0]
         image_path = os.path.join(data_dir, filename)
-        xml_path = os.path.join(data_dir, base_name + ".xml")
+        txt_path = os.path.join(data_dir, base_name + ".txt")
+        
+        labels, boxes = parse_txt(txt_path)            
+        image = load_image(image_path, False)
+        images.append(image)
+        all_labels.extend(labels)
+        all_boxes.extend(boxes)
+        total += 1
 
-        if os.path.exists(xml_path):
-            label = parse_xml(xml_path)
-            if label not in label_to_index:
-                label_to_index[label] = index
-                index += 1
-            label_index = label_to_index[label]
-
-            image = load_image(image_path)
-            images.append(image)
-            labels.append(label_index)
-
+print(f"total image is {total}")
 images = np.array(images)
-labels = to_categorical(np.array(labels))
+all_labels = np.array(all_labels)
+all_boxes = np.array(all_boxes)
 
-# define the CNN 
-model = models.Sequential()
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(224, 224, 3)))
-model.add(layers.MaxPooling2D((2,2)))  
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2,2)))  
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2,2))) 
-model.add(layers.Flattern())
-model.add(layers.Dense(64, activation = 'relu'))
-model.add(layers.Dense(10, activation = 'softmax'))
+base_model = applications.VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+for layer in base_model.layers:
+    layer.trainable = False
 
+x = base_model.output
+x = layers.Flatten()(x)
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+# Regression head for bounding box
+bbox_output = layers.Dense(1, activation='sigmoid', name='bbox_output')(x)
+# Classification head for object label
+classification_output = layers.Dense(len(label_to_index), activation='softmax', name='class_output')(x)
 
-# Train model; validation_ data are the test data we need ask to get from mentor. 
-model.fit(images, labels, epochs=10, validation_data = (test_image,test_label))
+model = models.Model(inputs=base_model.input, outputs=[bbox_output, classification_output])
 
+model.compile(optimizer='adam',
+              loss={'bbox_output': 'mean_squared_error', 'class_output': 'sparse_categorical_crossentropy'},
+              metrics={'class_output': 'accuracy'})
 
+# Split the data
+X_train, X_val, y_train_boxes, y_val_boxes, y_train_labels, y_val_labels = train_test_split(
+    images, all_boxes, all_labels, test_size=0.2, random_state=42)
 
+model.fit(X_train, {'bbox_output': y_train_boxes, 'class_output': y_train_labels},
+          validation_data=(X_val, {'bbox_output': y_val_boxes, 'class_output': y_val_labels}),
+          epochs=1, batch_size=32)
+
+test_image = load_image("/Users/zhenzhang/Desktop/CS courses /NGHackWeekTeam4/testimage/test.jpg", True)
+test_res = model.predict(test_image)
+# Get the class label index with the highest probability
+class_label_index = np.argmax(test_res[1])
+# Map the index to the class name
+class_name = label_to_index[class_label_index]
+
+print(f'The predicted class is: {class_name}')
+
+test_image1 = load_image("/Users/zhenzhang/Desktop/CS courses /NGHackWeekTeam4/testimage/test.jpg", True)
+test_res1 = model.predict(test_image1)
+# Get the class label index with the highest probability
+class_label_index1 = np.argmax(test_res1[1])
+# Map the index to the class name
+class_name1 = label_to_index[class_label_index1]
+print(f'The predicted class is: {class_name1}')
+"""
+model.save("path_to_save_model/my_model") # save the model and so that we can use for later pull out easier
+from tensorflow.keras.models import load_model # import the model 
+loaded_model = load_model("path_to_save_model/my_model") # use on test new data
+predictions = loaded_model.predict(some_input_data) # do the prediction for new data
+"""
