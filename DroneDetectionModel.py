@@ -33,7 +33,6 @@ def parse_txt(txt_path):
         
         return [label], [box]
 
-
 def show_images_with_boxes(images, boxes, labels):
     fig, axes = plt.subplots(4, 5, figsize=(15, 12))  # Adjust the size as needed
     axes = axes.ravel()
@@ -63,10 +62,10 @@ def show_images_with_boxes(images, boxes, labels):
     plt.show()
 
 
-
 images = []
 all_labels = []
 all_boxes = []
+
 
 label_to_index = {0: "drone", 1: "no drone"}  # Define mapping for labels
 index_to_label = {"drone": 0, "no drone": 1} # useful when we test our model on new images
@@ -118,6 +117,8 @@ X_train, X_val, y_train_boxes, y_val_boxes, y_train_labels, y_val_labels = train
 model.fit(X_train, {'bbox_output': y_train_boxes, 'class_output': y_train_labels},
           validation_data=(X_val, {'bbox_output': y_val_boxes, 'class_output': y_val_labels}),
           epochs=1, batch_size=32)
+
+
 
 test_image = load_image("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/baby_test_image.png", True)
 test_res = model.predict(test_image)
