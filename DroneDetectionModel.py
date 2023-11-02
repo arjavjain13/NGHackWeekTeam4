@@ -35,16 +35,7 @@ def parse_txt(txt_path):
         return [label], [box]
 
 def show_images_with_boxes(image, box):
-    # fig, axes = plt.subplots(4, 5, figsize=(15, 12))  # Adjust the size as needed
-    # axes.set_title(f'Label: {label_to_index[label]}', fontsize=12)
 
-    
-    # axes.imshow(images)
-    # axes.set_title(f'Label: {label_to_index[label]}', fontsize=12)
-    
-    # Add bounding box if label is 0 (drone)
-        # Convert bounding box from relative coordinates to image coordinates
-    print(image.shape)
     if len(image.shape) == 3:
         height, width, _ = image.shape
         center_x, center_y, w, h = box
@@ -55,19 +46,9 @@ def show_images_with_boxes(image, box):
 
         # Create a rectangle patch and add it to the axis
         modified_image = cv.rectangle(image, (x, y), w, h, (0, 0, 255), 2)
-            # axes.add_patch(rect)
-        cv.imshow("Detected Drone", modified_image)      # Display the modified image
-        cv.waitKey(0)  # Wait for a key event
-        cv.destroyAllWindows()
-    # Remove axes for cleaner look
-    # axes.axis('off')
 
-    # plt.subplots_adjust(wspace=0.5)
-    # plt.show()
-    
         return modified_image
     else:
-        print("failed")
         return None
 
 
@@ -93,13 +74,9 @@ for filename in os.listdir(data_dir):
         all_boxes.extend(boxes)
         total += 1
 
-print(f"total image is {total}")
 images = np.array(images)
 all_labels = np.array(all_labels)
 all_boxes = np.array(all_boxes)
-
-# Call the function to display images
-# show_images_with_boxes(images, all_boxes, all_labels)
 
 base_model = applications.VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
 for layer in base_model.layers:
@@ -127,27 +104,4 @@ model.fit(X_train, {'bbox_output': y_train_boxes, 'class_output': y_train_labels
           validation_data=(X_val, {'bbox_output': y_val_boxes, 'class_output': y_val_labels}),
           epochs=1, batch_size=32)
 
-
-
-# test_image = load_image("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/baby_test_image.png", True)
-# test_res = model.predict(test_image)
-# # Get the class label index with the highest probability
-# class_label_index = np.argmax(test_res[1])
-# if class_label_index == 0:
-#     show_images_with_boxes()
-# # Map the index to the class name
-# class_name = label_to_index[class_label_index]
-
-# print(f'The predicted class is: {class_name}')
-
-test_image1 = load_image("/Users/arjavjain/Desktop/NGHackWeek/TEST_txt/yoto06439.jpg", True)
-l, b = parse_txt("/Users/arjavjain/Desktop/NGHackWeek/TEST_txt/yoto06439.txt")
-test_res1 = model.predict(test_image1)
-show_images_with_boxes(test_image1, b[0])
-# Get the class label index with the highest probability
-class_label_index1 = np.argmax(test_res1[1])
-# Map the index to the class name
-class_name1 = label_to_index[class_label_index1]
-print(f'The predicted class is: {class_name1}')
-
-model.save("DroneDetection")  # save the model
+model.save("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/DroneDetection")  # save the model

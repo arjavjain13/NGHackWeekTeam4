@@ -72,9 +72,7 @@ for filename in os.listdir(data_dir):
         images.extend(image)
         all_labels.extend(labels)
 
-print(f"total image is {len(images)}")
 images = np.array(images)
-print(len(all_labels))
 all_labels = np.array(all_labels)
 
 model = models.Sequential()
