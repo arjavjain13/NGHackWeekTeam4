@@ -3,3 +3,6 @@ matplotlib
 tensorflow
 opencv-python
 lxml
+scikit-learn
+matplotlib
+flask
