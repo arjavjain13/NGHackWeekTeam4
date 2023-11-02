@@ -6,9 +6,6 @@ import cv2 as cv
 app = Flask(__name__, template_folder='templates')
 
 
-
-
-
 # Set the upload folder to a temporary location
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
