@@ -4,6 +4,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers, models, applications
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.metrics import AUC
+from tensorflow.keras.utils import to_categorical
+
 
 
 data_dir = "/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/ClassificationDataset"
@@ -90,52 +93,18 @@ model.add(layers.Dense(64, activation = 'relu'))
 model.add(layers.Dense(4, activation = 'softmax'))
 
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
-# print(images.shape)
-# print(labels.shape)
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy', AUC()])
 
 # split into training and validation data into 80 20
 X_train, X_val, y_train, y_val = train_test_split(images, all_labels, test_size=0.2, random_state=42)
 
-model.fit(X_train, y_train, epochs=20, validation_data=(X_val, y_val))
+y_train_encoded = to_categorical(y_train, num_classes=4)
+y_val_encoded = to_categorical(y_val, num_classes=4)
 
+# running with 25 epochs so that we dont overfit the model as we do not have that much data to train it on
+model.fit(X_train, y_train_encoded, epochs=25, validation_data=(X_val, y_val_encoded))
 
-# base_model = applications.VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-# for layer in base_model.layers:
-#     layer.trainable = False
-
-# x = base_model.output
-# x = layers.Flatten()(x)
-
-# # Regression head for bounding box
-# bbox_output = layers.Dense(3, activation='sigmoid', name='bbox_output')(x)
-# # Classification head for object label
-# classification_output = layers.Dense(len(label_to_index), activation='softmax', name='class_output')(x)
-
-# model = models.Model(inputs=base_model.input, outputs=[bbox_output, classification_output])
-
-# model.compile(optimizer='adam',
-#               loss={'bbox_output': 'mean_squared_error', 'class_output': 'sparse_categorical_crossentropy'},
-#               metrics={'class_output': 'accuracy'})
-
-# # Split the data
-# X_train, X_val, y_train_boxes, y_val_boxes, y_train_labels, y_val_labels = train_test_split(
-#     images, all_boxes, all_labels, test_size=0.2, random_state=42)
-
-# model.fit(X_train, {'bbox_output': y_train_boxes, 'class_output': y_train_labels},
-#           validation_data=(X_val, {'bbox_output': y_val_boxes, 'class_output': y_val_labels}),
-#           epochs=1, batch_size=32)
-
-
-
-# test_image1 = load_image("/Users/arjavjain/Documents/NGHackWeekTeam4/TRAIN", True)
-# test_res1 = model.predict(test_image1)
-# # Get the class label index with the highest probability
-# class_label_index1 = np.argmax(test_res1[1])
-# # Map the index to the class name
-# class_name1 = label_to_index[class_label_index1]
-# print(f'The predicted class is: {class_name1}')
 
 model.save("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/Classification") # save the model and so that we can use for later pull out easier
 
