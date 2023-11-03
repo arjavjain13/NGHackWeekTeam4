@@ -16,7 +16,6 @@ def load_image(image_path, convert):
     if convert:
         image = np.expand_dims(image, axis=0)
     image = image / 255.0
-    print(image.shape)
     return image
 
 def parse_txt(txt_path):
@@ -87,6 +86,7 @@ x = layers.Flatten()(x)
 
 # Regression head for bounding box
 bbox_output = layers.Dense(1, activation='sigmoid', name='bbox_output')(x)
+
 # Classification head for object label
 classification_output = layers.Dense(len(label_to_index), activation='softmax', name='class_output')(x)
 

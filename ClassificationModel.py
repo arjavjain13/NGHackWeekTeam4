@@ -41,7 +41,6 @@ def load_image(image_path, convert):
 
 def parse_name(image_path):
 
-    # print(image_path)
     label = 0
     if image_path.startswith(data_dir + "/F"):
         label = 0
@@ -104,6 +103,6 @@ y_val_encoded = to_categorical(y_val, num_classes=4)
 model.fit(X_train, y_train_encoded, epochs=25, validation_data=(X_val, y_val_encoded))
 
 
-model.save("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/Classification") # save the model and so that we can use for later pull out easier
+model.save("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/Classification") # save the model and so that we can use for later
 
 

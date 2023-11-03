@@ -9,14 +9,16 @@ from tensorflow.keras import layers, models, applications
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
 
+
 label_to_index = {0: "Fixed Wing Drone", 1: "Multi-Rotor Drone", 2: "Single Rotor Drone", 3: "Fixed Wing Hybrid VTOL"}
 
 def show_images_with_boxes(image, box):
     # Clone the original image to preserve it
-    modified_image = image.copy()
+    new_image = image.copy()
+
 
     # Convert bounding box from relative coordinates to image coordinates
-    height, width, _ = image.shape
+    height, width, _ = new_image.shape
     center_x, center_y, w, h = box
     x = int((center_x * width) - (w * width) / 2)
     y = int((center_y * height) - (h * height) / 2)
@@ -24,9 +26,9 @@ def show_images_with_boxes(image, box):
     h = int(h * height)
 
     # Create a red outline around the bounding box
-    cv.rectangle(modified_image, (x, y), (x + w, y + h), (0, 0, 255), 2)  # Using (0, 0, 255) for red color
+    new_image = cv.rectangle(new_image, (x, y), (w + x, h + y), (0, 0, 255), 2)
 
-    return modified_image
+    return new_image
 
 
 
@@ -54,6 +56,7 @@ def parse_txt_here(txt_path):
         
         return [label], [box]
 
+
     
 def runTest(test_image_path):
     detection_model = load_model("/Users/arjavjain/Documents/GitHub/NGHackWeekTeam4/DroneDetection", compile=False)
@@ -68,3 +71,5 @@ def runTest(test_image_path):
         return f'A drone was detected in the image, and the predicted class is: {class_name}'
     else:
         return 'There was no drone detected in the picture'
+
+

@@ -38,8 +38,10 @@ def result():
             if image_result != "There was no drone detected in the picture":
                 l, boxes = parse_txt_here(text_path)
                 modified_image = show_images_with_boxes(image_curr, boxes[0])
-                modified_image_path = os.path.join('static', 'images', 'modified_image.jpg')
-                cv.imwrite(modified_image_path, modified_image)
+                modified_image_path = image_path[:3] + "_mod.jpg"
+                modified_image.save(modified_image_path)
+                # modified_image_path = os.path.join('static', 'images', 'modified_image.jpg')
+                # cv.imwrite(modified_image_path, modified_image)
 
                 return render_template('result.html', result=image_result, picture=modified_image_path)
             else:
